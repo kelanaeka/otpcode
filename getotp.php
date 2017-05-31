@@ -17,7 +17,7 @@ $mytotp->setParameter('secret',$secret);
 $totp = $mytotp->now();
 //insert into db
 try{
-$dblink = new PDO('mysql:host=db;port=3306;dbname=db_otpphp','root','docker');
+$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
 $query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp) values ('" . $totp ."',0,'" . $datech . "'," . $tstamp . ")");
 $query->execute();
 } catch (PDOException $e) {
