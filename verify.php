@@ -15,6 +15,7 @@ $secret = Base32::encode($datenow);
 $mytotp = new TOTP();
 $mytotp->setParameter('digits',4);
 $mytotp->setParameter('secret',$secret);
+$mytotp->setParameter('period',60);
 $totp = $_POST['otpstr'];
 
 if ($mytotp->verify($totp, null, 1)){
