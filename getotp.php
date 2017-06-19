@@ -14,6 +14,7 @@ $secret = Base32::encode($datenow);
 $mytotp = new TOTP();
 $mytotp->setParameter('digits',4);
 $mytotp->setParameter('secret',$secret);
+$mytotp->setParameter('period',60);
 $totp = $mytotp->now();
 //insert into db
 try{
