@@ -30,6 +30,7 @@ if ($mytotp->verify($totp, null, 1)){
 		die();
 	}
 } else {
+	http_response_code(500)
 	$statuscode = 1;
 	$statusstr = "Your OTP is invalid";
 }
