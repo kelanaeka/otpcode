@@ -10,7 +10,16 @@ date_default_timezone_set('Asia/Jakarta');
 $datenow = date('l jS \of F Y h A');
 $datech = date('l jS \of F Y h:m:s A');
 $tstamp = date_timestamp_get(date_create());
-$secret = Base32::encode($datenow);
+//$secret = Base32::encode($datenow);
+$secret = Base32::encode($_POST['key']);
+if($secret == ""){
+	http_response_code(500);
+	$statuscode = 2;
+	$statusstr = "Please provide a key";
+	$statusarray = array('code' => $statuscode,'message'=>$statusstr);
+	echo json_encode($statusarray);
+	die();
+}
 
 $mytotp = new TOTP();
 $mytotp->setParameter('digits',4);
@@ -26,7 +35,12 @@ if ($mytotp->verify($totp, null, 1)){
 	$query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp) values ('" . $totp ."',1,'" . $datech . "'," . $tstamp . ")");
 	$query->execute();
 	} catch (PDOException $e) {
-		print "Error " . $e->getCode() . ": " . $e->getMessage() . "<br>";
+		http_response_code(500);
+		$statuscode = 3;
+		$statusstr = "Database error";
+		$statusarray = array('code' => $statuscode,'message'=>$statusstr);
+		echo json_encode($statusarray);
+		//print "Error " . $e->getCode() . ": " . $e->getMessage() . "<br>";
 		die();
 	}
 } else {
