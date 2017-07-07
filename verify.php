@@ -20,9 +20,12 @@ if($secret == ""){
 	echo json_encode($statusarray);
 	die();
 }
+$digitlen = $_POST['digit'];
+if($digitlen == ""|$digitlen < 2|$digitlen > 10)
+	$digitlen = 4;
 
 $mytotp = new TOTP();
-$mytotp->setParameter('digits',4);
+$mytotp->setParameter('digits',$digitlen);
 $mytotp->setParameter('secret',$secret);
 $mytotp->setParameter('period',60);
 $totp = $_POST['otpstr'];
