@@ -12,6 +12,11 @@ $datech = date('l jS \of F Y h:m:s A');
 $tstamp = date_timestamp_get(date_create());
 //$secret = Base32::encode($datenow);
 $secret = Base32::encode($_GET['key']);
+if(isset($_GET['maxattempt']) && $_GET['maxattempt'] > 0){
+	$max = $_GET['maxattempt'];
+}else{
+	$max = 0;
+}
 if($secret == ""){
 	http_response_code(500);
 	$statuscode = 2;
@@ -31,8 +36,8 @@ $mytotp->setParameter('period',60);
 $totp = $mytotp->now();
 //insert into db
 try{
-$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
-$query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp) values ('" . $totp ."',0,'" . $datech . "'," . $tstamp . ")");
+$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root','bajaksaja');
+$query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp,userkey,attempt,maxattempt) values ('" . $totp ."',0,'" . $datech . "'," . $tstamp . ",'".$_GET['key']."',0,".$max.")");
 $query->execute();
 } catch (PDOException $e) {
 	http_response_code(500);
