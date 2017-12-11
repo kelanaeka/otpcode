@@ -7,7 +7,7 @@ use OTPHP\TOTP;
 use Base32\Base32;
 
 try{
-	$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root','bajaksaja');
+	$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
 } catch (PDOException $e) {
 	http_response_code(500);
 	$statuscode = 3;
