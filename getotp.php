@@ -36,7 +36,7 @@ $mytotp->setParameter('period',60);
 $totp = $mytotp->now();
 //insert into db
 try{
-$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root','bajaksaja');
+$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
 $query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp,userkey,attempt,maxattempt) values ('" . $totp ."',0,'" . $datech . "'," . $tstamp . ",'".$_GET['key']."',0,".$max.")");
 $query->execute();
 } catch (PDOException $e) {
