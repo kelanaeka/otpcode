@@ -17,6 +17,11 @@ if(isset($_GET['maxattempt']) && $_GET['maxattempt'] > 0){
 }else{
 	$max = 0;
 }
+if(isset($_GET['expire']) && $_GET['expire']>60){
+	$expire = $_GET['expire'];
+}else{
+	$expire = 60;
+}
 if($secret == ""){
 	http_response_code(500);
 	$statuscode = 2;
@@ -32,12 +37,13 @@ if($digitlen == ""|$digitlen < 2|$digitlen > 10)
 $mytotp = new TOTP();
 $mytotp->setParameter('digits',$digitlen);
 $mytotp->setParameter('secret',$secret);
-$mytotp->setParameter('period',60);
+$mytotp->setParameter('period',$expire);
 $totp = $mytotp->now();
 //insert into db
 try{
-$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
-$query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp,userkey,attempt,maxattempt) values ('" . $totp ."',0,'" . $datech . "'," . $tstamp . ",'".$_GET['key']."',0,".$max.")");
+$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root',''); // untuk keperluan testing
+//$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
+$query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp,userkey,attempt,maxattempt,expire) values ('" . $totp ."',0,'" . $datech . "'," . $tstamp . ",'".$_GET['key']."',0,".$max.",".$expire.")");
 $query->execute();
 } catch (PDOException $e) {
 	http_response_code(500);
