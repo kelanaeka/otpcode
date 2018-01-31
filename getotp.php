@@ -41,8 +41,8 @@ $mytotp->setParameter('period',$expire);
 $totp = $mytotp->now();
 //insert into db
 try{
-$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root',''); // untuk keperluan testing
-//$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
+//$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root',''); // untuk keperluan testing
+$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
 $query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp,userkey,attempt,maxattempt,expire) values ('" . $totp ."',0,'" . $datech . "'," . $tstamp . ",'".$_GET['key']."',0,".$max.",".$expire.")");
 $query->execute();
 } catch (PDOException $e) {
