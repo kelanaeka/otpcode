@@ -6,19 +6,6 @@ include 'base32/src/Base32.php';
 use OTPHP\TOTP;
 use Base32\Base32;
 
-try{
-	//$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root',''); // untuk keperluan testing
-	$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
-} catch (PDOException $e) {
-	http_response_code(500);
-	$statuscode = 3;
-	$statusstr = "Database error";
-	$statusarray = array('code' => $statuscode,'message'=>$statusstr);
-	echo json_encode($statusarray);
-	//print "Error " . $e->getCode() . ": " . $e->getMessage() . "<br>";
-	die();
-}
-
 date_default_timezone_set('Asia/Jakarta');
 $datenow = date('l jS \of F Y h A');
 $datech = date('l jS \of F Y h:m:s A');
@@ -36,36 +23,30 @@ if($secret == ""){
 $digitlen = $_POST['digit'];
 if($digitlen == ""|$digitlen < 2|$digitlen > 10)
 	$digitlen = 4;
-
-try{
-	$query = $dblink->prepare("select attempt,maxattempt,expire from validotptbl where userkey='".$_POST['key']."' AND validated=0 order by timestamp desc");
-	$query->execute();
-	$result = $query->fetchAll();
-	$attempt = $result[0][0];
-	$maxattempt = $result[0][1];
-	$expire = $result[0][2];
-	//echo $attempt."-".$maxattempt;
-} catch (PDOException $e) {
-	http_response_code(500);
-	$statuscode = 3;
-	$statusstr = "Database error";
-	$statusarray = array('code' => $statuscode,'message'=>$statusstr);
-	echo json_encode($statusarray);
-	//print "Error " . $e->getCode() . ": " . $e->getMessage() . "<br>";
-	die();
+if(isset($_POST['maxattempt']) & $_POST['maxattempt']>=0){
+	$max = $_POST['maxattempt'];
+}else{
+	$max = "~";
 }
 
+if(isset($_POST['expire']) & $_POST['expire']>60){
+	$expire = $_POST['expire'];
+}else{
+	$expire = 60;
+}
 $mytotp = new TOTP();
 $mytotp->setParameter('digits',$digitlen);
 $mytotp->setParameter('secret',$secret);
 $mytotp->setParameter('period',$expire);
 $totp = $_POST['otpstr'];
 
-if ($mytotp->verify($totp, null, 1) && ($attempt < $maxattempt || $maxattempt == 0)){
+if ($mytotp->verify($totp, null, 1) && ($max>0 || $max == "~")){
 	$statuscode = 0;
 	$statusstr = "Your OTP is valid";
 	try{
-	$query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp,userkey,attempt,maxattempt,expire) values ('" . $totp ."',1,'" . $datech . "'," . $tstamp . ",'".$_POST['key']."',0,0,".$expire.")");
+	$dblink = new PDO('mysql:host=localhost;port=3306;dbname=db_otpphp','root',''); // Development Purpose
+	//$dblink = new PDO('mysql:host=otpdbsvc;port=3306;dbname=db_otpphp','root','docker');
+	$query = $dblink->prepare("insert into validotptbl (otpstr,validated,chtime,timestamp) values ('" . $totp ."',1,'" . $datech . "'," . $tstamp . ")");
 	$query->execute();
 	} catch (PDOException $e) {
 		http_response_code(500);
@@ -80,23 +61,17 @@ if ($mytotp->verify($totp, null, 1) && ($attempt < $maxattempt || $maxattempt ==
 	http_response_code(500);
 	$statuscode = 1;
 	$statusstr = "Your OTP is invalid";
-	if($attempt < $maxattempt){
-		try{
-			$query = $dblink->prepare("update validotptbl set attempt=attempt+1 where userkey='".$_POST['key']."'");
-			$query->execute();
-		} catch (PDOException $e) {
-			http_response_code(500);
-			$statuscode = 3;
-			$statusstr = "Database error";
-			$statusarray = array('code' => $statuscode,'message'=>$statusstr);
-			echo json_encode($statusarray);
-			//print "Error " . $e->getCode() . ": " . $e->getMessage() . "<br>";
-			die();
-		}
+}
+if($statuscode==0){
+	if($max!="~"){
+		$max = 0;
+	}
+}else{
+	if($max!="~"){
+		$max -= 1;
 	}
 }
-
-$statusarray = array('code' => $statuscode,'message'=>$statusstr);
+$statusarray = array('code' => $statuscode,'message'=>$statusstr, 'maxattempt'=>$max, 'expire'=>$expire);
 echo json_encode($statusarray);
 
 ?>

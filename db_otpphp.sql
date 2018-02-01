@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 31, 2018 at 08:16 AM
+-- Generation Time: Feb 01, 2018 at 08:49 AM
 -- Server version: 10.1.29-MariaDB
 -- PHP Version: 7.2.0
 
@@ -32,11 +32,7 @@ CREATE TABLE `validotptbl` (
   `otpstr` varchar(255) NOT NULL,
   `validated` int(11) NOT NULL,
   `chtime` varchar(255) NOT NULL,
-  `timestamp` int(11) NOT NULL,
-  `userkey` text NOT NULL,
-  `attempt` int(11) NOT NULL,
-  `maxattempt` int(11) NOT NULL,
-  `expire` int(11) NOT NULL
+  `timestamp` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 COMMIT;
 
